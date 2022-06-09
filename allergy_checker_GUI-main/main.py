@@ -1,8 +1,8 @@
 from tkinter import *
 from tkinter import scrolledtext
 from tkinter import ttk
-import re
 from tkinter import messagebox
+from inference_engine import *
 
 
 class User:
@@ -22,7 +22,6 @@ def allergens_picker_1():
     else:
         allergens.append('egg')
         allergen_button_1.configure(bg="green")
-    print(allergens)
 
 
 def allergens_picker_2():
@@ -32,7 +31,6 @@ def allergens_picker_2():
     else:
         allergens.append('seafood')
         allergen_button_2.configure(bg="green")
-    print(allergens)
 
 
 def allergens_picker_3():
@@ -42,7 +40,6 @@ def allergens_picker_3():
     else:
         allergens.append('crustacean')
         allergen_button_3.configure(bg="green")
-    print(allergens)
 
 
 def allergens_picker_4():
@@ -52,17 +49,15 @@ def allergens_picker_4():
     else:
         allergens.append('peanut')
         allergen_button_4.configure(bg="green")
-    print(allergens)
 
 
 def allergens_picker_5():
     if 'tree nut' in allergens:
-        allergens.remove('tree nut')
+        allergens.remove('tree_nut')
         allergen_button_5.configure(bg='white')
     else:
-        allergens.append('tree nut')
+        allergens.append('tree_nut')
         allergen_button_5.configure(bg="green")
-    print(allergens)
 
 
 def allergens_picker_6():
@@ -72,7 +67,6 @@ def allergens_picker_6():
     else:
         allergens.append('milk')
         allergen_button_6.configure(bg="green")
-    print(allergens)
 
 
 def allergens_picker_7():
@@ -82,7 +76,6 @@ def allergens_picker_7():
     else:
         allergens.append('gluten')
         allergen_button_7.configure(bg="green")
-    print(allergens)
 
 
 def allergens_picker_8():
@@ -92,7 +85,6 @@ def allergens_picker_8():
     else:
         allergens.append('sesame')
         allergen_button_8.configure(bg="green")
-    print(allergens)
 
 
 def allergens_picker_9():
@@ -102,7 +94,6 @@ def allergens_picker_9():
     else:
         allergens.append('celery')
         allergen_button_9.configure(bg="green")
-    print(allergens)
 
 
 def allergens_picker_10():
@@ -112,7 +103,6 @@ def allergens_picker_10():
     else:
         allergens.append('haram')
         allergen_button_10.configure(bg="green")
-    print(allergens)
 
 
 def check_button():
@@ -122,12 +112,11 @@ def check_button():
         allergens_final = list(set(allergens))
         print(allergens_final)
         user = User(
-            allergens_final,
-            text_1.get("1.0", 'end-1c'),
-            text_2.get("1.0", 'end-1c')
+            allergens_final,  # user allergy
+            text_1.get("1.0", 'end-1c'),  # name of the food
+            text_2.get("1.0", 'end-1c')  # food ingredient
         )
         result_page(user)
-        # window.destroy()
         window.withdraw()
     else:
         print("require values")
@@ -135,6 +124,9 @@ def check_button():
 
 
 def result_page(user):
+    # to inference
+    output = processAllergen(user)
+
     window_2 = Toplevel()
     window_2.title("Result Page - " + user.food_name)
     window_2.geometry("850x450")
@@ -157,7 +149,7 @@ def result_page(user):
     text_3 = Text(window_2)
 
     # THIS IS THE TEXT USED IN THE EXTRA EXPLANATION
-    text_3.insert('1.0', 'THIS IS THE CONTENT THAT INSERTED INTO THE EXTRA EXPLANATION PART')
+    text_3.insert('1.0', output[1])
 
     text_3.configure(state=DISABLED)
 
@@ -168,10 +160,11 @@ def result_page(user):
     label_5.grid(column=5, row=3, sticky=NW, rowspan=2, padx=5, pady=5)
     text_3.grid(column=5, row=4, sticky=NW, rowspan=2, padx=5, pady=5)
 
+
     for i in range(len(user.allergens)):
         treeview.insert("", i,
-                        values=(user.allergens[i], bool(re.search(user.allergens[i], user.ingredient, re.IGNORECASE))))
-        if bool(re.search(user.allergens[i], user.ingredient, re.IGNORECASE)):
+                        values=(user.allergens[i], output[0][i]))
+        if True in output[0]:
             label_4.configure(text="Not Ok to Eat", fg="red")
             canvas_2 = Canvas(window_2, width=30, height=30)
             x0, y0, x1, y1 = 5, 5, 20, 20
